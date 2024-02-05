@@ -1,8 +1,6 @@
 # RL_flappy_bird
 
 ## Overview
-Flappy Bird is a game in which the player controls a bird attempting to fly between columns of green pipes without hitting them
-<br>
 This project implements Reinforcement Learning (RL) algorithms to train a model to play Flappy Bird game. The code is designed to provide a demonstration of Q-learning in action, showcasing how an agent learns to navigate and improve its performance in the Flappy Bird environment.
 
 ## Table of Contents
