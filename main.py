@@ -18,34 +18,42 @@ class SmartFlappyBird:
 
     @staticmethod
     def get_all_actions():
+        # get two available actions, jump or not to
         return [0, 1]
 
     @staticmethod
     def convert_continuous_to_discrete(state):
+        # return distance from center of next pipe vertically
         _, y = state
         simplified_y = round(y, 1)
         return 0, simplified_y
 
     def compute_reward(self, prev_info, new_info, done, observation):
+        # compute reward of the action done
         reward = 0
         if done:
             reward = -1000
 
         else:
+            # slight distance gets big reward
             if (0 <= observation[1] <= 0.05):
                 new_info['score'] = prev_info['score'] + 1
                 reward = 500
 
+            # larger distance gets reward proportionally
             elif (observation[1] > 0.05):
                 new_info['score'] = prev_info['score'] + 0.5
                 reward = (1 / abs(observation[1]))
 
+            # not much reward if bird is below the next pipe center
             elif (observation[1] < 0):
                 reward = 1
         
         return reward
 
     def get_action(self, state):
+        # change the normal distribution and return actionn
+        # or use policy
         nuse_policy = utils.flip_coin(self.epsilon)
         if nuse_policy:
             random_number = random.randint(0, 100)
@@ -58,17 +66,21 @@ class SmartFlappyBird:
             return self.policy(state)
 
     def maxQ(self, state):
+        # return maximum Q value of a state
         return max(self.Qvalues.get((state, action), 0) for action in self.get_all_actions())
 
     def max_arg(self, state):
+        # return argument of the max Q of a state
         actions = self.get_all_actions()
         return actions[np.argmax([self.Qvalues.get((state, action), 0) for action in actions])]
 
     def update(self, reward, state, action, next_state):
+        # update the q table using Q-learning formula
         max_a = self.max_arg(next_state)
         self.Qvalues[(state, action)] += self.alpha * (reward + self.landa * self.Qvalues[next_state, max_a] - self.Qvalues[(state, action)])
 
     def update_epsilon_alpha(self):
+        # update epsilon and alpha exponentially
         if self.epsilon > 0.01:
             self.epsilon = self.epsilon * 0.95
 
@@ -76,6 +88,7 @@ class SmartFlappyBird:
             self.alpha = self.alpha * 0.95
 
     def run_with_policy(self, landa):
+        # run the algorithm multiple times to train the model
         self.landa = landa
         env = flappy_bird_gym.make("FlappyBird-v0")
         observation = env.reset()
@@ -98,6 +111,7 @@ class SmartFlappyBird:
         env.close()
 
     def run_with_no_policy(self, landa):
+        # run the model based on trained model
         self.landa = landa
         self.alpha = 0
         self.epsilon = 0
@@ -117,12 +131,11 @@ class SmartFlappyBird:
         env.close()
 
     def run(self):
-        start = time.time()
         self.run_with_policy(1)
-        end = time.time()
-        print(end - start)
         self.run_with_no_policy(1)
 
+# change bird speed (if you aren't patient enough)
 bird_speed = 100 # FPS
+# also change the iterations for training (patience problem again)
 program = SmartFlappyBird(iterations=1000)
 program.run()
